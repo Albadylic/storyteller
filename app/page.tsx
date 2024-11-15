@@ -17,19 +17,45 @@ export default function Chat() {
     { emoji: "😏", value: "Sarcastic" },
     { emoji: "😂", value: "Funny" },
   ];
+  const characters = [
+    { emoji: "👸", value: "Princess" },
+    { emoji: "🐉", value: "Dragon" },
+    { emoji: "👽", value: "Alien" },
+    { emoji: "🐋", value: "Whale" },
+  ];
 
   const [state, setState] = useState({
     genre: "",
     tone: "",
+    characters: [],
   });
 
   const handleChange = ({
-    target: { name, value },
+    target: { name, value, type, checked },
   }: React.ChangeEvent<HTMLInputElement>) => {
-    setState({
-      ...state,
-      [name]: value,
-    });
+    switch (type) {
+      case "radio":
+        setState({
+          ...state,
+          [name]: value,
+        });
+        break;
+      case "checkbox":
+        if (checked) {
+          setState({
+            ...state,
+            [name]: [...state[name], value],
+          });
+        } else {
+          const index = state[name].indexOf(value);
+          if (index > -1) {
+            state[name].splice(index, 1);
+          }
+        }
+        break;
+      default:
+        console.error(`${type} is not supported`);
+    }
   };
 
   return (
@@ -91,13 +117,37 @@ export default function Chat() {
             </div>
           </div>
 
+          <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+            <h3 className="text-xl font-semibold">Characters</h3>
+
+            <div className="flex flex-wrap justify-center">
+              {characters.map(({ value, emoji }) => (
+                <div
+                  key={value}
+                  className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
+                >
+                  <input
+                    id={value}
+                    type="checkbox"
+                    name="characters"
+                    value={value}
+                    onChange={handleChange}
+                  />
+                  <label className="ml-2" htmlFor={value}>
+                    {`${emoji} ${value}`}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
             disabled={isLoading || !state.genre || !state.tone}
             onClick={() =>
               append({
                 role: "user",
-                content: `Generate a ${state.genre} story in a ${state.tone} tone`,
+                content: `Generate a ${state.genre} story in a ${state.tone} tone. Include the following characters, if any are listed: ${state.characters}`,
               })
             }
           >
