@@ -230,7 +230,6 @@ export default function Chat() {
                       const { value, done } = await reader.read();
                       if (done) break;
 
-                      const chunk = decoder.decode(value, { stream: true });
                       response += decoder.decode(value, { stream: true }); // Append chunk
                     }
 

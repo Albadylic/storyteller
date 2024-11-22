@@ -5,28 +5,36 @@ import { NextRequest } from "next/server";
 const assistantId = process.env.OPEN_AI_ASSISTANT_ID;
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  try {
+    const body = await req.json();
 
-  const thread = await openai.beta.threads.create();
-  await openai.beta.threads.messages.create(thread.id, {
-    role: "user",
-    content: body,
-  });
+    const thread = await openai.beta.threads.create();
+    await openai.beta.threads.messages.create(thread.id, {
+      role: "user",
+      content: body,
+    });
 
-  const result = await openai.beta.threads.runs.create(thread.id, {
-    assistant_id: assistantId,
-    stream: true,
-  });
+    const result = await openai.beta.threads.runs.create(thread.id, {
+      assistant_id: assistantId,
+      stream: true,
+    });
 
-  const response = result.toReadableStream();
+    return new Response(result.toReadableStream(), {
+      headers: {
+        "Content-Type": "text/plain", // Correct content type for plain text streaming
+        "Transfer-Encoding": "chunked", // Indicates streaming response
+        Connection: "keep-alive", // Keeps the connection open for streaming
+      },
+    });
+  } catch (error) {
+    console.error("Error in API route:", error);
 
-  return new Response(response, {
-    headers: {
-      "content-type": "text/plain",
-      "transfers-encoding": "chunked",
-      connection: "keep-alive",
-    },
-  });
-
-  //NextResponse.json({ success: true, data: body });
+    // Handle errors gracefully
+    return new Response(JSON.stringify({ error: "Something went wrong." }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
 }
