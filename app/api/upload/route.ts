@@ -1,15 +1,11 @@
 import OpenAI from "openai";
 const openai = new OpenAI();
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 const assistantId = process.env.OPEN_AI_ASSISTANT_ID;
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-
-  // const assistant = await openai.beta.assistants.retrieve({
-  //   assistantId: assistantId,
-  // });
 
   const thread = await openai.beta.threads.create();
   await openai.beta.threads.messages.create(thread.id, {
