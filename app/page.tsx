@@ -2,9 +2,7 @@
 
 import { useState, ChangeEvent } from "react";
 import { useChat } from "ai/react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
+import shrek from "./sources/Shrek";
 // import Options from "./components/Options";
 // import Characters from "./components/Characters";
 
@@ -18,6 +16,8 @@ export default function Chat() {
   const [charactersState, setCharactersState] = useState({
     characters: [],
   });
+
+  const [text, setText] = useState(shrek);
 
   function Options() {
     const genres = [
@@ -107,7 +107,21 @@ export default function Chat() {
             type="file"
             accept=".txt"
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              // File handling logic will be added here
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                  const fileContent = event.target?.result as string;
+                  setText(fileContent);
+                  setNeedsNewIndex(true);
+                };
+                if (file.type != "text/plain") {
+                  console.error(`${file.type} parsing not implemented`);
+                  setText("Error");
+                } else {
+                  reader.readAsText(file);
+                }
+              }
             }}
           />
         </div>
