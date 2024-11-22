@@ -1,62 +1,119 @@
 "use client";
 
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { useChat } from "ai/react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+// import Options from "./components/Options";
+// import Characters from "./components/Characters";
 
 export default function Chat() {
   const { messages, append, isLoading } = useChat();
-  const genres = [
-    { emoji: "🧙", value: "Fantasy" },
-    { emoji: "🕵️", value: "Mystery" },
-    { emoji: "💑", value: "Romance" },
-    { emoji: "🚀", value: "Sci-Fi" },
-  ];
-  const tones = [
-    { emoji: "😊", value: "Happy" },
-    { emoji: "😢", value: "Sad" },
-    { emoji: "😏", value: "Sarcastic" },
-    { emoji: "😂", value: "Funny" },
-  ];
-  const characters = [
-    { emoji: "👸", value: "Princess" },
-    { emoji: "🐉", value: "Dragon" },
-    { emoji: "👽", value: "Alien" },
-    { emoji: "🐋", value: "Whale" },
-  ];
-
-  const [state, setState] = useState({
+  const [optionsState, setOptionsState] = useState({
     genre: "",
     tone: "",
+  });
+
+  const [charactersState, setCharactersState] = useState({
     characters: [],
   });
 
-  const handleChange = ({
-    target: { name, value, type, checked },
-  }: React.ChangeEvent<HTMLInputElement>) => {
-    switch (type) {
-      case "radio":
-        setState({
-          ...state,
-          [name]: value,
-        });
-        break;
-      case "checkbox":
-        if (checked) {
-          setState({
-            ...state,
-            [name]: [...state[name], value],
-          });
-        } else {
-          const index = state[name].indexOf(value);
-          if (index > -1) {
-            state[name].splice(index, 1);
-          }
-        }
-        break;
-      default:
-        console.error(`${type} is not supported`);
-    }
-  };
+  function Options() {
+    const genres = [
+      { emoji: "🧙", value: "Fantasy" },
+      { emoji: "🕵️", value: "Mystery" },
+      { emoji: "💑", value: "Romance" },
+      { emoji: "🚀", value: "Sci-Fi" },
+    ];
+
+    const tones = [
+      { emoji: "😊", value: "Happy" },
+      { emoji: "🤥", value: "Fable" },
+      { emoji: "😭", value: "Tragic" },
+      { emoji: "😂", value: "Funny" },
+    ];
+
+    const handleOptionsChange = ({
+      target: { name, value },
+    }: ChangeEvent<HTMLInputElement>) => {
+      setOptionsState({
+        ...optionsState,
+        [name]: value,
+      });
+    };
+
+    return (
+      <>
+        <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Genre</h3>
+
+          <div className="flex flex-wrap justify-center">
+            {genres.map(({ value, emoji }) => (
+              <div
+                key={value}
+                className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
+              >
+                <input
+                  id={value}
+                  type="radio"
+                  value={value}
+                  name="genre"
+                  onChange={handleOptionsChange}
+                />
+                <label className="ml-2" htmlFor={value}>
+                  {`${emoji} ${value}`}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+          <h3 className="text-xl font-semibold">Tones</h3>
+
+          <div className="flex flex-wrap justify-center">
+            {tones.map(({ value, emoji }) => (
+              <div
+                key={value}
+                className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
+              >
+                <input
+                  id={value}
+                  type="radio"
+                  name="tone"
+                  value={value}
+                  onChange={handleOptionsChange}
+                />
+                <label className="ml-2" htmlFor={value}>
+                  {`${emoji} ${value}`}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  function Characters() {
+    return (
+      <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+        <h3 className="text-xl font-semibold">Characters</h3>
+        <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2 p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg">
+          <label htmlFor={"fileInput"}>Upload source text file:</label>
+          <input
+            id={"fileInput"}
+            type="file"
+            accept=".txt"
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              // File handling logic will be added here
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="mx-auto w-full p-24 flex flex-col">
@@ -69,85 +126,16 @@ export default function Chat() {
             </p>
           </div>
 
-          <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
-            <h3 className="text-xl font-semibold">Genre</h3>
-
-            <div className="flex flex-wrap justify-center">
-              {genres.map(({ value, emoji }) => (
-                <div
-                  key={value}
-                  className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
-                >
-                  <input
-                    id={value}
-                    type="radio"
-                    value={value}
-                    name="genre"
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2" htmlFor={value}>
-                    {`${emoji} ${value}`}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
-            <h3 className="text-xl font-semibold">Tones</h3>
-
-            <div className="flex flex-wrap justify-center">
-              {tones.map(({ value, emoji }) => (
-                <div
-                  key={value}
-                  className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
-                >
-                  <input
-                    id={value}
-                    type="radio"
-                    name="tone"
-                    value={value}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2" htmlFor={value}>
-                    {`${emoji} ${value}`}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
-            <h3 className="text-xl font-semibold">Characters</h3>
-
-            <div className="flex flex-wrap justify-center">
-              {characters.map(({ value, emoji }) => (
-                <div
-                  key={value}
-                  className="p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg"
-                >
-                  <input
-                    id={value}
-                    type="checkbox"
-                    name="characters"
-                    value={value}
-                    onChange={handleChange}
-                  />
-                  <label className="ml-2" htmlFor={value}>
-                    {`${emoji} ${value}`}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <Options />
+          <Characters />
 
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-            disabled={isLoading || !state.genre || !state.tone}
+            disabled={isLoading}
             onClick={() =>
               append({
                 role: "user",
-                content: `Generate a ${state.genre} story in a ${state.tone} tone. Include the following characters, if any are listed: ${state.characters}`,
+                content: `Generate a ${optionsState.genre} story in a ${optionsState.tone} tone. Include the following characters, if any are listed: ${charactersState.characters}`,
               })
             }
           >
