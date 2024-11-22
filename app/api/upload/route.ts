@@ -1,61 +1,36 @@
-import {
-  Document,
-  MetadataMode,
-  SentenceSplitter,
-  VectorStoreIndex,
-  getNodesFromDocument,
-  serviceContextFromDefaults,
-} from "llamaindex";
-// import type { NextApiRequest, NextApiResponse } from "next";
-
+import OpenAI from "openai";
+const openai = new OpenAI();
 import { NextRequest, NextResponse } from "next/server";
 
-type Input = {
-  document: string;
-  chunkSize?: number;
-  chunkOverlap?: number;
-};
+const assistantId = process.env.OPEN_AI_ASSISTANT_ID;
 
-type Output = {
-  error?: string;
-  payload?: {
-    nodesWithEmbedding: {
-      text: string;
-      embedding: number[];
-    }[];
-  };
-};
-
-export async function POST(req: NextRequest, res: NextResponse<Output>) {
-  // if (req.method !== "POST") {
-  //   res.status(405).json({ error: "Method not allowed" });
-  //   return;
-  // }
-
+export async function POST(req: NextRequest) {
   const body = await req.json();
-  console.log(body);
 
-  // const { document, chunkSize, chunkOverlap }: Input = req.body;
-
-  // const nodes = getNodesFromDocument(
-  //   new Document({ text: document }),
-  //   new SentenceSplitter({ chunkSize, chunkOverlap })
-  // );
-
-  // const nodesWithEmbeddings = await VectorStoreIndex.getNodeEmbeddingResults(
-  //   nodes,
-  //   serviceContextFromDefaults(),
-  //   true
-  // );
-
-  // res.status(200).json({
-  //   payload: {
-  //     nodesWithEmbedding: nodesWithEmbeddings.map((nodeWithEmbedding) => ({
-  //       text: nodeWithEmbedding.getContent(MetadataMode.NONE),
-  //       embedding: nodeWithEmbedding.getEmbedding(),
-  //     })),
-  //   },
+  // const assistant = await openai.beta.assistants.retrieve({
+  //   assistantId: assistantId,
   // });
 
-  return NextResponse.json({ success: true, data: body });
+  const thread = await openai.beta.threads.create();
+  await openai.beta.threads.messages.create(thread.id, {
+    role: "user",
+    content: body,
+  });
+
+  const result = await openai.beta.threads.runs.create(thread.id, {
+    assistant_id: assistantId,
+    stream: true,
+  });
+
+  const response = result.toReadableStream();
+
+  return new Response(response, {
+    headers: {
+      "content-type": "text/plain",
+      "transfers-encoding": "chunked",
+      connection: "keep-alive",
+    },
+  });
+
+  //NextResponse.json({ success: true, data: body });
 }
