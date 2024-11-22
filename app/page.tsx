@@ -100,69 +100,69 @@ export default function Chat() {
     );
   }
 
-  function Characters() {
-    return (
-      <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
-        <h3 className="text-xl font-semibold">Characters</h3>
-        <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2 p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg">
-          <label htmlFor={"fileInput"}>Upload source text file:</label>
-          <input
-            id={"fileInput"}
-            type="file"
-            accept=".txt"
-            onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                  const fileContent = event.target?.result as string;
-                  setText(fileContent);
-                  // setNeedsNewIndex(true);
-                };
-                if (file.type != "text/plain") {
-                  console.error(`${file.type} parsing not implemented`);
-                  setText("Error");
-                } else {
-                  reader.readAsText(file);
-                }
-              }
-            }}
-          />
-          <button
-            className="bg-emerald-500 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:opacity-50"
-            onClick={async () => {
-              setLoadingChracters(true);
-              const result = await fetch("/api/upload", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  document: text,
-                }),
-              });
+  // function Characters() {
+  //   return (
+  //     <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+  //       <h3 className="text-xl font-semibold">Characters</h3>
+  //       <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2 p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg">
+  //         <label htmlFor={"fileInput"}>Upload source text file:</label>
+  //         <input
+  //           id={"fileInput"}
+  //           type="file"
+  //           accept=".txt"
+  //           onChange={(e: ChangeEvent<HTMLInputElement>) => {
+  //             const file = e.target.files?.[0];
+  //             if (file) {
+  //               const reader = new FileReader();
+  //               reader.onload = (event) => {
+  //                 const fileContent = event.target?.result as string;
+  //                 setText(fileContent);
+  //                 // setNeedsNewIndex(true);
+  //               };
+  //               if (file.type != "text/plain") {
+  //                 console.error(`${file.type} parsing not implemented`);
+  //                 setText("Error");
+  //               } else {
+  //                 reader.readAsText(file);
+  //               }
+  //             }
+  //           }}
+  //         />
+  //         <button
+  //           className="bg-emerald-500 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:opacity-50"
+  //           onClick={async () => {
+  //             setLoadingChracters(true);
+  //             const result = await fetch("/api/upload", {
+  //               method: "POST",
+  //               headers: {
+  //                 "Content-Type": "application/json",
+  //               },
+  //               body: JSON.stringify({
+  //                 document: text,
+  //               }),
+  //             });
 
-              const { error, payload } = await result.json();
+  //             const { error, payload } = await result.json();
 
-              if (error) {
-                setError(error);
-              }
+  //             if (error) {
+  //               setError(error);
+  //             }
 
-              if (payload) {
-                setNodesWithEmbedding(payload.nodesWithEmbedding);
-                setError("Success!");
-              }
+  //             if (payload) {
+  //               setNodesWithEmbedding(payload.nodesWithEmbedding);
+  //               setError("Success!");
+  //             }
 
-              setLoadingChracters(false);
-            }}
-          >
-            Extract characters
-          </button>
-          <p>{error}</p>
-        </div>
-      </div>
-    );
-  }
+  //             setLoadingChracters(false);
+  //           }}
+  //         >
+  //           Extract characters
+  //         </button>
+  //         <p>{error}</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <main className="mx-auto w-full p-24 flex flex-col">
@@ -176,7 +176,67 @@ export default function Chat() {
           </div>
 
           <Options />
-          <Characters />
+          {/* <Characters /> */}
+
+          <div className="space-y-4 bg-opacity-25 bg-gray-700 rounded-lg p-4">
+            <h3 className="text-xl font-semibold">Characters</h3>
+            <div className="my-2 flex h-3/4 flex-auto flex-col space-y-2 p-4 m-2 bg-opacity-25 bg-gray-600 rounded-lg">
+              <label htmlFor={"fileInput"}>Upload source text file:</label>
+              <input
+                id={"fileInput"}
+                type="file"
+                accept=".txt"
+                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      const fileContent = event.target?.result as string;
+                      setText(fileContent);
+                      // setNeedsNewIndex(true);
+                    };
+                    if (file.type != "text/plain") {
+                      console.error(`${file.type} parsing not implemented`);
+                      setText("Error");
+                    } else {
+                      reader.readAsText(file);
+                    }
+                  }
+                }}
+              />
+              <button
+                className="bg-emerald-500 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:opacity-50"
+                onClick={async () => {
+                  setLoadingChracters(true);
+                  const result = await fetch("/api/upload", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      document: text,
+                    }),
+                  });
+
+                  const { error, payload } = await result.json();
+
+                  if (error) {
+                    setError(error);
+                  }
+
+                  if (payload) {
+                    setNodesWithEmbedding(payload.nodesWithEmbedding);
+                    setError("Success!");
+                  }
+
+                  setLoadingChracters(false);
+                }}
+              >
+                Extract characters
+              </button>
+              <p>{error}</p>
+            </div>
+          </div>
 
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
