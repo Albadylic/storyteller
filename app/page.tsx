@@ -240,17 +240,6 @@ export default function Chat() {
                     reader.releaseLock();
                   }
 
-                  // const { error, payload } = await result.json();
-
-                  // if (error) {
-                  //   setError(error);
-                  // }
-
-                  // if (payload) {
-                  //   setNodesWithEmbedding(payload.nodesWithEmbedding);
-                  //   setError("Success!");
-                  // }
-
                   setLoadingChracters(false);
                 }}
               >
