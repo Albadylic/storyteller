@@ -19,6 +19,10 @@ export default function Chat() {
 
   const [text, setText] = useState(shrek);
 
+  const [loadingCharacters, setLoadingChracters] = useState(false);
+  const [error, setError] = useState("No error");
+  const [nodesWithEmbedding, setNodesWithEmbedding] = useState([]);
+
   function Options() {
     const genres = [
       { emoji: "🧙", value: "Fantasy" },
@@ -113,7 +117,7 @@ export default function Chat() {
                 reader.onload = (event) => {
                   const fileContent = event.target?.result as string;
                   setText(fileContent);
-                  setNeedsNewIndex(true);
+                  // setNeedsNewIndex(true);
                 };
                 if (file.type != "text/plain") {
                   console.error(`${file.type} parsing not implemented`);
@@ -124,6 +128,37 @@ export default function Chat() {
               }
             }}
           />
+          <button
+            className="bg-emerald-500 hover:bg-blue-700 text-white py-2 px-4 rounded disabled:opacity-50"
+            onClick={async () => {
+              setLoadingChracters(true);
+              const result = await fetch("/api/upload", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  document: text,
+                }),
+              });
+
+              const { error, payload } = await result.json();
+
+              if (error) {
+                setError(error);
+              }
+
+              if (payload) {
+                setNodesWithEmbedding(payload.nodesWithEmbedding);
+                setError("Success!");
+              }
+
+              setLoadingChracters(false);
+            }}
+          >
+            Extract characters
+          </button>
+          <p>{error}</p>
         </div>
       </div>
     );
@@ -145,7 +180,7 @@ export default function Chat() {
 
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-            disabled={isLoading}
+            disabled={isLoading || loadingCharacters}
             onClick={() =>
               append({
                 role: "user",
