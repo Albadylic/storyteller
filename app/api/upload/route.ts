@@ -14,8 +14,6 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json();
 
-  // console.log({ input });
-
   const threadId = (await openai.beta.threads.create({})).id;
 
   const createdMessage = await openai.beta.threads.messages.create(threadId, {
@@ -25,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   return AssistantResponse(
     { threadId, messageId: createdMessage.id },
-    async ({ forwardStream, sendDataMessage }) => {
+    async ({ forwardStream }) => {
       const runStream = openai.beta.threads.runs.stream(threadId, {
         assistant_id:
           assistantId ??
@@ -34,72 +32,6 @@ export async function POST(req: NextRequest) {
           })(),
       });
       await forwardStream(runStream);
-      console.log(forwardStream(runStream));
     }
   );
 }
-
-//       while (
-//         runResult.status === "requires_action" &&
-//         runResult?.required_action?.type === "submit_tool_outputs"
-//       ) {
-//         const tool_outputs =
-//           runResult.required_action.submit_tool_outputs.tool_calls.map(
-//             (toolCall: any) => {
-//               const parameters = JSON.parse(toolCall.function.arguments);
-
-//               switch (toolCall.function.name) {
-//                 // configure tool calls
-
-//                 default:
-//                   throw new Error(
-//                     `Unknown tool call function: ${toolCall.function.name}`
-//                   );
-//               }
-//             }
-//           );
-
-//         runResult = await forwardStream(
-//           openai.beta.threads.runs.submitToolOutputsStream(
-//             threadId,
-//             runResult.id,
-//             { tool_outputs }
-//           )
-//         );
-//       }
-//     }
-//   );
-// }
-
-// Old version
-// try {
-//   const body = await req.json();
-
-//   const thread = await openai.beta.threads.create();
-//   await openai.beta.threads.messages.create(thread.id, {
-//     role: "user",
-//     content: body,
-//   });
-
-//   const result = await openai.beta.threads.runs.create(thread.id, {
-//     assistant_id: assistantId,
-//     stream: true,
-//   });
-
-//   return new Response(result.toReadableStream(), {
-//     headers: {
-//       "Content-Type": "text/plain", // Correct content type for plain text streaming
-//       "Transfer-Encoding": "chunked", // Indicates streaming response
-//       Connection: "keep-alive", // Keeps the connection open for streaming
-//     },
-//   });
-// } catch (error) {
-//   console.error("Error in API route:", error);
-
-//   // Handle errors gracefully
-//   return new Response(JSON.stringify({ error: "Something went wrong." }), {
-//     status: 500,
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   });
