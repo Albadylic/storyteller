@@ -7,16 +7,20 @@ const assistantId = process.env.OPEN_AI_ASSISTANT_ID;
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
-  const input: {
-    threadId: string | null;
-    message: string;
-  } = await req.json();
+  // const input: {
+  //   threadId: string | null;
+  //   message: string;
+  // } = await req.json();
 
-  const threadId = input.threadId ?? (await openai.beta.threads.create({})).id;
+  const body = await req.json();
+
+  // console.log({ input });
+
+  const threadId = (await openai.beta.threads.create({})).id;
 
   const createdMessage = await openai.beta.threads.messages.create(threadId, {
     role: "user",
-    content: input.message,
+    content: body,
   });
 
   return AssistantResponse(
@@ -29,39 +33,43 @@ export async function POST(req: NextRequest) {
             throw new Error("Assistant ID is not defined");
           })(),
       });
-      let runResult = await forwardStream(runStream);
-
-      while (
-        runResult.status === "requires_action" &&
-        runResult?.required_action?.type === "submit_tool_outputs"
-      ) {
-        const tool_outputs =
-          runResult.required_action.submit_tool_outputs.tool_calls.map(
-            (toolCall: any) => {
-              const parameters = JSON.parse(toolCall.function.arguments);
-
-              switch (toolCall.function.name) {
-                // configure tool calls
-
-                default:
-                  throw new Error(
-                    `Unknown tool call function: ${toolCall.function.name}`
-                  );
-              }
-            }
-          );
-
-        runResult = await forwardStream(
-          openai.beta.threads.runs.submitToolOutputsStream(
-            threadId,
-            runResult.id,
-            { tool_outputs }
-          )
-        );
-      }
+      await forwardStream(runStream);
+      console.log(forwardStream(runStream));
     }
   );
 }
+
+//       while (
+//         runResult.status === "requires_action" &&
+//         runResult?.required_action?.type === "submit_tool_outputs"
+//       ) {
+//         const tool_outputs =
+//           runResult.required_action.submit_tool_outputs.tool_calls.map(
+//             (toolCall: any) => {
+//               const parameters = JSON.parse(toolCall.function.arguments);
+
+//               switch (toolCall.function.name) {
+//                 // configure tool calls
+
+//                 default:
+//                   throw new Error(
+//                     `Unknown tool call function: ${toolCall.function.name}`
+//                   );
+//               }
+//             }
+//           );
+
+//         runResult = await forwardStream(
+//           openai.beta.threads.runs.submitToolOutputsStream(
+//             threadId,
+//             runResult.id,
+//             { tool_outputs }
+//           )
+//         );
+//       }
+//     }
+//   );
+// }
 
 // Old version
 // try {

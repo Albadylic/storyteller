@@ -24,7 +24,7 @@ export default function Chat() {
   const [text, setText] = useState(shrek);
 
   const [loadingCharacters, setLoadingChracters] = useState(false);
-  const [error, setError] = useState("No error");
+  const [characters, setCharacters] = useState("Upload a file to continue");
   const [nodesWithEmbedding, setNodesWithEmbedding] = useState([]);
 
   function Options() {
@@ -142,7 +142,7 @@ export default function Chat() {
                   "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  document: text,
+                  message: text,
                 }),
               });
 
@@ -221,7 +221,7 @@ export default function Chat() {
                   });
 
                   if (!result.body) {
-                    console.error(error);
+                    console.error("No body received from request.");
                     return;
                   }
 
@@ -236,20 +236,21 @@ export default function Chat() {
 
                       response += decoder.decode(value, { stream: true }); // Append chunk
                     }
-
-                    console.log("Full response:", response);
                   } catch (error) {
                     console.error("Error reading stream:", error);
                   } finally {
                     reader.releaseLock();
                   }
 
+                  console.log("Full response:", response);
+                  setCharacters(response);
+
                   setLoadingChracters(false);
                 }}
               >
                 Extract characters
               </button>
-              <p>{error}</p>
+              <p>{characters}</p>
             </div>
           </div>
 
