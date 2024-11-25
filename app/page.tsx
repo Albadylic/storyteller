@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, ChangeEvent } from "react";
-import { useChat } from "ai/react";
+import { useChat, useAssistant } from "ai/react";
 import shrek from "./sources/Shrek";
 // import Options from "./components/Options";
 // import Characters from "./components/Characters";
 
 export default function Chat() {
   const { messages, append, isLoading } = useChat();
+  const { status, input, submitMessage, handleInputChange } = useAssistant({
+    api: "/api/assistant",
+  });
+
   const [optionsState, setOptionsState] = useState({
     genre: "",
     tone: "",
